@@ -65,7 +65,6 @@ class Driver
             this_amount += (r.days_rented - 2) * 15
           end
         else
-
       end
       
       if this_amount < 0
