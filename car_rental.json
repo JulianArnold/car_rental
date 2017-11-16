@@ -1,0 +1,9 @@
+{
+  "desc": {
+    "Car rental record for: " : "some name"
+  },
+  "result": {
+    "Amount owed is €" : "some amount",
+    "Earned bonus points: " : "some number"
+  }
+}

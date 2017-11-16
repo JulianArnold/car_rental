@@ -6,7 +6,7 @@
 # 3. Create a rake task that runs your tests.
 #
 
-
+require 'json'
 
 class Car
   SALOON = 0
@@ -67,7 +67,7 @@ class Driver
             this_amount += (r.days_rented - 2) * 15
           end
         else
-          "Are you sure this vehicle is reserved?"
+          "Please check your reservation, thank you."
       end
       
       if this_amount < 0
@@ -83,8 +83,10 @@ class Driver
       total += this_amount
     end
 
-    result += "Amount owed is €" + "#{total.to_s}" + " "
+    result += "Amount owed is €" + "#{total.to_s}" + ", "
     result += "Earned bonus points: " + bonus_points.to_s
-    puts result
+
+    json_statement = File.read('car_rental.json')
+    JSON.parse(json_statement)
   end
 end
