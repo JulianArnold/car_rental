@@ -8,89 +8,86 @@
 
 require 'json'
 
-
-module CarRental
+class Car
   SALOON = 0
   SUV = 1
   HATCHBACK = 2
 
-  class Car
-    attr_reader :title
-    attr_accessor :style
+  attr_reader :title
+  attr_accessor :style
 
-    def initialize(title, style)
-      @title = title
-      @style = style
+  def initialize(title, style)
+    @title = title
+    @style = style
+  end
+end
+
+class Rental
+  attr_reader :car, :days_rented
+
+  def initialize(car, days_rented)
+    @car = car
+    @days_rented = days_rented
+
+    if @days_rented < 1
+      raise 'Error: days_rented invalid'
     end
   end
+end
 
-  class Rental
-    attr_reader :car, :days_rented
+class Driver
+  attr_reader :name
 
-    def initialize(car, days_rented)
-      @car = car
-      @days_rented = days_rented
+  def initialize(name)
+    @name = name
+    @rentals = []
+  end
 
-      if @days_rented < 1
-        raise 'Error: days_rented invalid'
+  def add_rental(rental)
+    @rentals << rental
+  end
+
+  def statement
+    total = 0
+    bonus_points = 0
+    result = "Car rental record for #{@name.to_s}: "
+    for r in @rentals
+      this_amount = 0
+      case r.car.style
+        when Car::SUV
+          this_amount += r.days_rented * 30
+        when Car::HATCHBACK
+          this_amount += 15
+          if r.days_rented > 3
+            this_amount += (r.days_rented - 3) * 15
+          end
+        when Car::SALOON
+          this_amount += 20
+          if r.days_rented > 2
+            this_amount += (r.days_rented - 2) * 15
+          end
+        else
+          'Please check your reservation, thank you.'
       end
-    end
-  end
 
-  class Driver
-    attr_reader :name
+      if this_amount < 0
+        bonus_points -= 10
+      end
 
-    def initialize(name)
-      @name = name
-      @rentals = []
-    end
-
-    def add_rental(rental)
-      @rentals << rental
-    end
-
-    def statement
-      total = 0
-      bonus_points = 0
-      result = "Car rental record for #{@name.to_s}: "
-      for r in @rentals
-        this_amount = 0
-        case r.car.style
-          when Car::SUV
-            this_amount += r.days_rented * 30
-          when Car::HATCHBACK
-            this_amount += 15
-            if r.days_rented > 3
-              this_amount += (r.days_rented - 3) * 15
-            end
-          when Car::SALOON
-            this_amount += 20
-            if r.days_rented > 2
-              this_amount += (r.days_rented - 2) * 15
-            end
-          else
-            'Please check your reservation, thank you.'
-        end
-
-        if this_amount < 0
-          bonus_points -= 10
-        end
-
+      bonus_points += 1
+      if r.car.style == Car::SUV && r.days_rented > 1
         bonus_points += 1
-        if r.car.style == Car::SUV && r.days_rented > 1
-          bonus_points += 1
-        end
-
-        result += r.car.title.to_s + ',' + this_amount.to_s + ' '
-        total += this_amount
       end
 
-      result += "Amount owed is €" + "#{total.to_s}" + ', '
-      result += "Earned bonus points: " + bonus_points.to_s
-      result
-
-      json_statement = File.read('car_rental.json')
-      JSON.parse(json_statement)
+      result += r.car.title.to_s + ',' + this_amount.to_s + ' '
+      total += this_amount
     end
+
+    result += 'Amount owed is €' + "#{total.to_s}" + ', '
+    result += 'Earned bonus points: ' + bonus_points.to_s
+    result
+
+    json_statement = File.read('car_rental.json')
+    JSON.parse(json_statement)
   end
 end
